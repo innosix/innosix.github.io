@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>키 생성</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f9;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+      }
+      #app {
+        background: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        width: 300px;
+      }
+      form {
+        display: flex;
+        flex-direction: column;
+      }
+      label {
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
+      input {
+        margin-bottom: 15px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+      button {
+        padding: 10px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+      }
+      button:hover {
+        background-color: #0056b3;
+      }
+      #result {
+        margin-top: 20px;
+        font-weight: bold;
+        color: #333;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <form id="keyForm">
+        <label for="userName">USER NAME:</label>
+        <input type="text" id="userName" name="userName" required>
+        <label for="hostName">HOST NAME:</label>
+        <input type="text" id="hostName" name="hostName" required>
+        <label for="macAddr">MAC ADDR:</label>
+        <input type="text" id="macAddr" name="macAddr" required pattern="^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$">
+        <button type="button" onclick="createKey()">생성</button>
+      </form>
+      <div id="result"></div>
+    </div>
+
+    <script>
+      function createKey() {
+        const userName = document.getElementById('userName').value;
+        const hostName = document.getElementById('hostName').value;
+        const macAddr = document.getElementById('macAddr').value;
+
+        if (!userName || !hostName || !macAddr) {
+          alert('모든 필드를 입력해주세요.');
+          return;
+        }
+
+        const macAddrPattern = /^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/;
+        if (!macAddrPattern.test(macAddr)) {
+          alert('유효한 MAC 주소를 입력해주세요.');
+          return;
+        }
+
+        const data = {
+          name: userName,
+          host: hostName,
+          mac: macAddr
+        };
+
+        fetch('https://ykd1w81sxg.execute-api.ap-northeast-2.amazonaws.com/key/create', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById('result').innerText = `Key: ${data.key}`;
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('키 생성 중 오류가 발생했습니다.');
+        });
+      }
+    </script>
+  </body>
+</html>
