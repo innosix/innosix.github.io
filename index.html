@@ -4,249 +4,31 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>innosix</title>
-  <style>
-    body {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background-color: #f0f2f5;
-    }
-
-    .container {
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      width: 300px;
-      text-align: center;
-    }
-
-    h1 {
-      margin-bottom: 20px;
-      font-size: 24px;
-      color: #333;
-    }
-
-    label {
-      text-align: left;
-      display: block;
-      margin-bottom: 5px;
-      font-weight: bold;
-      color: #555;
-    }
-
-    input {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 15px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      box-sizing: border-box;
-    }
-
-    button {
-      width: 100%;
-      padding: 10px;
-      background-color: #007BFF;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 16px;
-    }
-
-    button:hover {
-      background-color: #0056b3;
-    }
-
-    #apiForm {
-      display: none;
-    }
-
-    #result {
-      margin-top: 20px;
-      font-weight: bold;
-      color: #333;
-    }
-
-    #toast {
-      visibility: hidden;
-      min-width: 250px;
-      margin-left: -125px;
-      background-color: #333;
-      color: #fff;
-      text-align: center;
-      border-radius: 8px;
-      padding: 16px;
-      position: fixed;
-      z-index: 1;
-      left: 50%;
-      bottom: 30px;
-      font-size: 17px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-      transition: visibility 0s, opacity 0.5s linear;
-    }
-
-    #toast.show {
-      visibility: visible;
-      opacity: 1;
-      animation: fadein 0.5s, fadeout 0.5s 2.5s;
-    }
-
-    @keyframes fadein {
-      from {bottom: 0; opacity: 0;}
-      to {bottom: 30px; opacity: 1;}
-    }
-
-    @keyframes fadeout {
-      from {bottom: 30px; opacity: 1;}
-      to {bottom: 0; opacity: 0;}
-    }
-  </style>
+  <title>InnoCodegen</title>
+  <link rel="stylesheet" href="./style.css">
+  <script src="./index.js"></script>
 </head>
 
 <body>
   <div class="container">
-    <form id="loginForm">
-      <label for="id">ID</label>
-      <input type="text" id="id" name="id" required>
-      <label for="password">Password</label>
-      <input type="password" id="password" name="password" required>
-      <button id="loginFormButton" type="button">Login</button>
+    <form id="loginForm" target="blank">
+      <label for="id">ID</label><input type="text" name="id" required>
+      <label for="password">Password</label><input type="password" name="password" required>
+      <button type="submit">Login</button>
     </form>
 
-    <form id="apiForm">
-      <label for="hostName">User Name</label>
-      <input type="text" id="name" name="name" required>
-      <label for="hostName">Host Name</label>
-      <input type="text" id="hostName" name="hostName" required>
-      <label for="macAddr">MAC Address</label>
-      <input type="text" id="macAddr" name="macAddr" required>
-      <button id="apiFormButton" type="button">Submit</button>
+    <form id="apiForm" target="blank">
+      <label for="hostName">User Name</label><input type="text" name="name" required>
+      <label for="hostName">Host Name</label><input type="text" name="host" required>
+      <label for="macAddr">MAC Address</label><input type="text" name="mac" required>
+      <button type="submit">Submit</button>
       <div id="result"></div>
     </form>
   </div>
-
   <div id="toast"></div>
-
-  <script>
-    if(isLogin()) {
-      document.getElementById('apiForm').style.display = 'block';
-      document.getElementById('loginForm').style.display = 'none';
-    } else {
-      localStorage.removeItem('token');
-    }
-
-    function isLogin() {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        showToast('로그인이 필요합니다.');
-        document.getElementById('loginForm').style.display = 'block';
-        document.getElementById('apiForm').style.display = 'none';
-        localStorage.removeItem('token');
-        return false;
-      }
-      return true;
-    }
-    function showToast(message) {
-      const toast = document.getElementById("toast");
-      toast.innerText = message;
-      toast.className = "show";
-      setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
-    }
-    
-    document.getElementById('loginFormButton').addEventListener('click', function (event) {
-      event.preventDefault();
-
-      const id = document.getElementById('id').value;
-      const password = document.getElementById('password').value;
-
-      fetch('https://ykd1w81sxg.execute-api.ap-northeast-2.amazonaws.com/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ id, password })
-      })
-        .then(response => response.json())
-        .then(data => {
-          if (data.token) {
-            localStorage.setItem('token', data.token);
-            showToast('로그인 성공');
-            document.getElementById('apiForm').style.display = 'block';
-            document.getElementById('loginForm').style.display = 'none';
-          }
-        })
-        .catch(error => {
-          showToast('로그인 실패');
-        });
-    });
-
-    document.getElementById('apiFormButton').addEventListener('click', function (event) {
-      event.preventDefault();
-
-      if(!isLogin()) return;
-
-      document.getElementById('result').innerText = "";
-
-      const hostName = document.getElementById('hostName').value;
-      const macAddr = document.getElementById('macAddr').value;
-      const name = document.getElementById('name').value;
-
-      if (!hostName || !macAddr || !name) {
-        showToast('모든 필드를 입력해주세요.');
-        return;
-      }
-
-      const macAddrPattern = /^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/;
-      if (!macAddrPattern.test(macAddr)) {
-        showToast('유효한 MAC 주소를 입력해주세요.');
-        return;
-      }
-
-      const data = {
-        host: hostName,
-        mac: macAddr,
-        name: name
-      };
-
-      const token = localStorage.getItem('token');
-
-      fetch('https://ykd1w81sxg.execute-api.ap-northeast-2.amazonaws.com/key/create', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(data)
-      })
-        .then(response => {
-          if (response.status !== 200) {
-            showToast('로그인이 만료되었습니다. 다시 로그인하세요.');
-            localStorage.removeItem('token');
-            document.getElementById('loginForm').style.display = 'block';
-            document.getElementById('apiForm').style.display = 'none';
-          }
-          return response.json();
-        })
-        .then(data => {
-          if(data.key) {
-            document.getElementById('result').innerText = `Key: ${data.key}`;
-          } else {
-            document.getElementById('result').innerText = "";
-          }
-        })
-        .catch(error => {
-          document.getElementById('loginForm').style.display = 'block';
-          document.getElementById('apiForm').style.display = 'none';
-          console.error('Error:', error);
-        });
-    });
-  </script>
+  <div class="hist-container" id="historyCont">
+    <textarea id="history" readonly></textarea>
+    <button type="button" id="toggleHistory">라이선스 생성기록</button>
+  </div>
 </body>
-
 </html>
